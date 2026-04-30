@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Ihasan\ReportBuilder\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class ReportBuilderCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'report-builder';
 
     public $description = 'My command';
 
