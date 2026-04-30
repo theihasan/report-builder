@@ -2,9 +2,9 @@
 
 namespace Ihasan\ReportBuilder;
 
+use Ihasan\ReportBuilder\Commands\ReportBuilderCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Ihasan\ReportBuilder\Commands\ReportBuilderCommand;
 
 class ReportBuilderServiceProvider extends PackageServiceProvider
 {

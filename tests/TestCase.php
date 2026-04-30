@@ -2,9 +2,9 @@
 
 namespace Ihasan\ReportBuilder\Tests;
 
+use Ihasan\ReportBuilder\ReportBuilderServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Ihasan\ReportBuilder\ReportBuilderServiceProvider;
 
 class TestCase extends Orchestra
 {
