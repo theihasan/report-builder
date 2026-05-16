@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Ihasan\ReportBuilder\Tests\Unit;
 
+use Ihasan\ReportBuilder\DTOs\FilterCondition;
+use Ihasan\ReportBuilder\DTOs\FilterGroup;
 use Ihasan\ReportBuilder\DTOs\OutputDefinition;
 use Ihasan\ReportBuilder\DTOs\ReportDefinition;
 use Ihasan\ReportBuilder\DTOs\SelectedColumn;
 use Ihasan\ReportBuilder\DTOs\SortDefinition;
+use Ihasan\ReportBuilder\Enums\FilterOperator;
 use Ihasan\ReportBuilder\Tests\TestCase;
 use InvalidArgumentException;
 
@@ -68,6 +71,26 @@ class ReportDefinitionTest extends TestCase
 
         $json = $definition->toJson();
         $hydrated = ReportDefinition::fromJson($json);
+
+        $this->assertSame($definition->toArray(), $hydrated->toArray());
+    }
+
+    public function test_report_definition_filter_tree_round_trip(): void
+    {
+        $filters = new FilterGroup('or', [
+            new FilterGroup('and', [
+                new FilterCondition('status', FilterOperator::Equals, 'paid'),
+                new FilterCondition('total', FilterOperator::GreaterThan, 1000),
+            ]),
+            new FilterGroup('and', [
+                new FilterCondition('status', FilterOperator::Equals, 'pending'),
+                new FilterCondition('due_date', FilterOperator::DateBefore, '2026-05-16'),
+            ]),
+        ]);
+
+        $definition = new ReportDefinition(sourceKey: 'orders', filters: $filters);
+
+        $hydrated = ReportDefinition::fromArray($definition->toArray());
 
         $this->assertSame($definition->toArray(), $hydrated->toArray());
     }
