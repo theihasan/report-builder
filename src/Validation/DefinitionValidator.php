@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ihasan\ReportBuilder\Validation;
 
+use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
 use Ihasan\ReportBuilder\DTOs\FilterCondition;
 use Ihasan\ReportBuilder\DTOs\FilterGroup;
 use Ihasan\ReportBuilder\DTOs\ReportDefinition;
 use Ihasan\ReportBuilder\Enums\FilterOperator;
 use Ihasan\ReportBuilder\Exceptions\InvalidReportDefinitionException;
-use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
 use Ihasan\ReportBuilder\Exceptions\ReportSourceNotFoundException;
 use Ihasan\ReportBuilder\Support\SourceRegistry;
 
