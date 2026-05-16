@@ -13,8 +13,7 @@ final class ScheduleDefinition
         public readonly ?string $timezone = 'UTC',
         public readonly ?string $cronExpression = null,
         public readonly ?int $dayOfWeek = null,
-    ) {
-    }
+    ) {}
 
     public static function daily(?string $timezone = 'UTC'): self
     {

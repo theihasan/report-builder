@@ -41,4 +41,3 @@ class ReportSchedule extends Model
         return $query->where('enabled', true);
     }
 }
-
