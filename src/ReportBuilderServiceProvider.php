@@ -6,6 +6,9 @@ namespace Ihasan\ReportBuilder;
 
 use Ihasan\ReportBuilder\Commands\ReportBuilderCommand;
 use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
+use Ihasan\ReportBuilder\Execution\CsvExporter;
+use Ihasan\ReportBuilder\Execution\ExportManager;
+use Ihasan\ReportBuilder\Execution\ReportQueryCompilerAdapter;
 use Ihasan\ReportBuilder\Query\FilterCompiler;
 use Ihasan\ReportBuilder\Query\ReportQueryCompiler;
 use Ihasan\ReportBuilder\Support\DataSourceRegistry;
@@ -69,5 +72,11 @@ class ReportBuilderServiceProvider extends PackageServiceProvider
 
         $this->app->singleton(FilterCompiler::class);
         $this->app->singleton(ReportQueryCompiler::class);
+        $this->app->singleton(ReportQueryCompilerAdapter::class);
+        $this->app->singleton(CsvExporter::class);
+        $this->app->singleton(
+            ExportManager::class,
+            static fn (Application $app): ExportManager => new ExportManager([$app->make(CsvExporter::class)]),
+        );
     }
 }
