@@ -75,7 +75,6 @@ class ReportDefinitionTest extends TestCase
         $this->assertSame($definition->toArray(), $hydrated->toArray());
     }
 
-
     public function test_report_definition_filter_tree_round_trip(): void
     {
         $filters = new FilterGroup('or', [
@@ -95,6 +94,7 @@ class ReportDefinitionTest extends TestCase
 
         $this->assertSame($definition->toArray(), $hydrated->toArray());
     }
+
     public function test_it_throws_for_invalid_sort_direction(): void
     {
         $this->expectException(InvalidArgumentException::class);
