@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ihasan\ReportBuilder;
 
+use Ihasan\ReportBuilder\Commands\DiscoverDueSchedulesCommand;
 use Ihasan\ReportBuilder\Commands\ReportBuilderCommand;
 use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
 use Ihasan\ReportBuilder\Execution\CsvExporter;
@@ -12,6 +13,7 @@ use Ihasan\ReportBuilder\Execution\ReportQueryCompilerAdapter;
 use Ihasan\ReportBuilder\Execution\XlsxExporter;
 use Ihasan\ReportBuilder\Query\FilterCompiler;
 use Ihasan\ReportBuilder\Query\ReportQueryCompiler;
+use Ihasan\ReportBuilder\Scheduling\DueScheduleDiscovery;
 use Ihasan\ReportBuilder\Support\DataSourceRegistry;
 use Ihasan\ReportBuilder\Support\SourceRegistry;
 use Ihasan\ReportBuilder\Validation\DefinitionValidator;
@@ -31,7 +33,9 @@ class ReportBuilderServiceProvider extends PackageServiceProvider
             ->hasViews()
             ->hasMigration('create_report_builder_table')
             ->hasMigration('create_report_builder_saved_reports_table')
-            ->hasCommand(ReportBuilderCommand::class);
+            ->hasMigration('create_report_builder_report_schedules_table')
+            ->hasCommand(ReportBuilderCommand::class)
+            ->hasCommand(DiscoverDueSchedulesCommand::class);
     }
 
     public function packageRegistered(): void
@@ -77,6 +81,7 @@ class ReportBuilderServiceProvider extends PackageServiceProvider
         $this->app->singleton(ReportQueryCompilerAdapter::class);
         $this->app->singleton(CsvExporter::class);
         $this->app->singleton(XlsxExporter::class);
+        $this->app->singleton(DueScheduleDiscovery::class);
         $this->app->singleton(
             ExportManager::class,
             static fn (Application $app): ExportManager => new ExportManager([
