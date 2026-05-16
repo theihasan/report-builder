@@ -30,6 +30,7 @@ class ReportBuilderServiceProvider extends PackageServiceProvider
             ->hasRoute('api')
             ->hasViews()
             ->hasMigration('create_report_builder_table')
+            ->hasMigration('create_report_builder_saved_reports_table')
             ->hasCommand(ReportBuilderCommand::class);
     }
 
