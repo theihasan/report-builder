@@ -18,7 +18,7 @@ class RowMapper
         $mapped = [];
 
         foreach ($selectedColumns as $selectedColumn) {
-            $mapped[$this->outputKey($selectedColumn)] = $row->getAttribute($selectedColumn->fieldKey());
+            $mapped[$this->outputKey($selectedColumn)] = data_get($row, $selectedColumn->fieldKey());
         }
 
         return $mapped;
