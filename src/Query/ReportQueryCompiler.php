@@ -6,6 +6,7 @@ namespace Ihasan\ReportBuilder\Query;
 
 use Ihasan\ReportBuilder\DTOs\ReportDefinition;
 use Ihasan\ReportBuilder\Exceptions\InvalidReportDefinitionException;
+use Ihasan\ReportBuilder\ReportSources\Fields\RelationField;
 use Ihasan\ReportBuilder\Support\SourceRegistry;
 use Ihasan\ReportBuilder\Validation\DefinitionValidator;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,11 +25,21 @@ class ReportQueryCompiler
 
         $source = $this->sourceRegistry->source($definition->sourceKey());
         $query = $source->query();
+        $model = $query->getModel();
 
         $selects = [];
+        $relationsToLoad = [];
 
         foreach ($definition->selectedColumns() as $selectedColumn) {
             $fieldKey = $selectedColumn->fieldKey();
+            $field = $source->field($fieldKey);
+
+            if ($field instanceof RelationField) {
+                $relationsToLoad[] = $field->relation();
+                $selects[] = $field->foreignKey();
+
+                continue;
+            }
 
             if (str_contains($fieldKey, '.')) {
                 throw new InvalidReportDefinitionException([
@@ -39,7 +50,13 @@ class ReportQueryCompiler
             $selects[] = $fieldKey;
         }
 
-        $query->select($selects);
+        $selects[] = $model->getKeyName();
+
+        $query->select(array_values(array_unique($selects)));
+
+        if ($relationsToLoad !== []) {
+            $query->with(array_values(array_unique($relationsToLoad)));
+        }
 
         if ($definition->filters() !== null) {
             $this->filterCompiler->apply($query, $definition->filters());
