@@ -22,6 +22,13 @@ You can install the package via composer:
 composer require ihasan/report-builder
 ```
 
+
+## Documentation
+
+- [Documentation Home](docs/index.md)
+- [Documentation Plan](docs/DOCUMENTATION_PLAN.md)
+- [API Survey](docs/API_SURVEY.md)
+
 ## Testing
 
 ```bash
