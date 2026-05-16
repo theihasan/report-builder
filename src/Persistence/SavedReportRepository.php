@@ -6,6 +6,7 @@ namespace Ihasan\ReportBuilder\Persistence;
 
 use Ihasan\ReportBuilder\DTOs\ReportDefinition;
 use Ihasan\ReportBuilder\Models\SavedReport;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use JsonException;
 use Throwable;
@@ -62,6 +63,6 @@ class SavedReportRepository
 
     private function generatePublicId(): string
     {
-        return (string) \Illuminate\Support\Str::uuid();
+        return (string) Str::uuid();
     }
 }
