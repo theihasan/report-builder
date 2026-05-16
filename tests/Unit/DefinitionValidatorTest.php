@@ -15,8 +15,10 @@ use Ihasan\ReportBuilder\ReportSources\Fields\DateField;
 use Ihasan\ReportBuilder\ReportSources\Fields\TextField;
 use Ihasan\ReportBuilder\ReportSources\ReportSource;
 use Ihasan\ReportBuilder\Support\SourceRegistry;
+use Ihasan\ReportBuilder\Tests\Fixtures\TestModel;
 use Ihasan\ReportBuilder\Tests\TestCase;
 use Ihasan\ReportBuilder\Validation\DefinitionValidator;
+use Illuminate\Database\Eloquent\Builder;
 
 class DefinitionValidatorTest extends TestCase
 {
@@ -151,5 +153,10 @@ class OrdersReportSource extends ReportSource
             TextField::make('status')->selectable()->filterable()->sortable(false),
             DateField::make('created_at')->selectable()->filterable()->sortable(),
         ];
+    }
+
+    public function query(): Builder
+    {
+        return TestModel::query();
     }
 }

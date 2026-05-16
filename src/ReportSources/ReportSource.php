@@ -6,6 +6,7 @@ namespace Ihasan\ReportBuilder\ReportSources;
 
 use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
 use Ihasan\ReportBuilder\ReportSources\Contracts\FieldContract;
+use Illuminate\Database\Eloquent\Builder;
 
 abstract class ReportSource implements ReportSourceContract
 {
@@ -46,5 +47,10 @@ abstract class ReportSource implements ReportSourceContract
         }
 
         return null;
+    }
+
+    public function query(): Builder
+    {
+        throw new \BadMethodCallException('Report source must implement query() to provide a base builder.');
     }
 }
