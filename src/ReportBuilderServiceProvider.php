@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ihasan\ReportBuilder;
 
 use Ihasan\ReportBuilder\Commands\ReportBuilderCommand;
+use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
 use Ihasan\ReportBuilder\Support\DataSourceRegistry;
+use Ihasan\ReportBuilder\Support\SourceRegistry;
 use Illuminate\Contracts\Foundation\Application;
+use InvalidArgumentException;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -26,6 +31,23 @@ class ReportBuilderServiceProvider extends PackageServiceProvider
         $this->app->singleton(
             DataSourceRegistry::class,
             static fn (): DataSourceRegistry => new DataSourceRegistry,
+        );
+
+        $this->app->singleton(
+            SourceRegistry::class,
+            function (Application $app): SourceRegistry {
+                $registry = new SourceRegistry;
+
+                foreach ((array) config('report-builder.report_sources', []) as $sourceClass) {
+                    if (! is_string($sourceClass) || ! is_subclass_of($sourceClass, ReportSourceContract::class)) {
+                        throw new InvalidArgumentException('Each configured report source must implement '.ReportSourceContract::class.'.');
+                    }
+
+                    $registry->register($app->make($sourceClass));
+                }
+
+                return $registry;
+            },
         );
 
         $this->app->singleton(

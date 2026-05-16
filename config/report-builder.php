@@ -15,4 +15,5 @@ return [
     'enable_dashboards' => true,
     'enable_excel' => false,
     'enable_pdf' => false,
+    'report_sources' => [],
 ];
