@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Ihasan\ReportBuilder\Http\Controllers\Api\DataSourceController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(config('report-builder.api_middleware', ['api']))
     ->prefix(config('report-builder.route_prefix', 'report-builder'))

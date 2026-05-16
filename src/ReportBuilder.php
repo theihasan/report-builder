@@ -2,9 +2,9 @@
 
 namespace Ihasan\ReportBuilder;
 
-use Illuminate\Http\Request;
 use Ihasan\ReportBuilder\Contracts\DataSourceContract;
 use Ihasan\ReportBuilder\Support\DataSourceRegistry;
+use Illuminate\Http\Request;
 
 class ReportBuilder
 {

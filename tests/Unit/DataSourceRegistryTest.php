@@ -16,7 +16,7 @@ class DataSourceRegistryTest extends TestCase
 {
     public function test_it_registers_and_resolves_a_data_source(): void
     {
-        $registry = new DataSourceRegistry();
+        $registry = new DataSourceRegistry;
         $dataSource = $this->makeDataSource();
 
         $registry->register($dataSource);
@@ -30,7 +30,7 @@ class DataSourceRegistryTest extends TestCase
 
     public function test_it_rejects_duplicate_source_keys(): void
     {
-        $registry = new DataSourceRegistry();
+        $registry = new DataSourceRegistry;
         $registry->register($this->makeDataSource());
 
         $this->expectException(DataSourceAlreadyRegisteredException::class);
@@ -40,7 +40,7 @@ class DataSourceRegistryTest extends TestCase
 
     public function test_it_throws_for_an_unknown_source_key(): void
     {
-        $registry = new DataSourceRegistry();
+        $registry = new DataSourceRegistry;
 
         $this->expectException(DataSourceNotFoundException::class);
 

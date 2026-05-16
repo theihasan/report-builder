@@ -3,14 +3,14 @@
 namespace Ihasan\ReportBuilder\DataSources;
 
 use Closure;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Http\Request;
 use Ihasan\ReportBuilder\Contracts\DataSourceContract;
 use Ihasan\ReportBuilder\DTOs\FieldDefinition;
 use Ihasan\ReportBuilder\Exceptions\InvalidDataSourceConfigurationException;
 use Ihasan\ReportBuilder\Support\Field;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Http\Request;
 
 class EloquentDataSource implements DataSourceContract
 {
@@ -121,6 +121,6 @@ class EloquentDataSource implements DataSourceContract
             throw InvalidDataSourceConfigurationException::invalidModel($this->key, $model);
         }
 
-        return new $model();
+        return new $model;
     }
 }

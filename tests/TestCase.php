@@ -2,7 +2,6 @@
 
 namespace Ihasan\ReportBuilder\Tests;
 
-use Ihasan\ReportBuilder\ReportBuilderServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Tests\TestCase as ApplicationTestCase;
 
@@ -12,15 +11,15 @@ abstract class TestCase extends ApplicationTestCase
     {
         parent::setUp();
 
-        config()->set("report-builder.api_middleware", ["api"]);
-        config()->set("report-builder.route_prefix", "report-builder");
+        config()->set('report-builder.api_middleware', ['api']);
+        config()->set('report-builder.route_prefix', 'report-builder');
 
         Factory::guessFactoryNamesUsing(
-            fn(
+            fn (
                 string $modelName,
-            ) => "Ihasan\\ReportBuilder\\Database\\Factories\\" .
-                class_basename($modelName) .
-                "Factory",
+            ) => 'Ihasan\\ReportBuilder\\Database\\Factories\\'.
+                class_basename($modelName).
+                'Factory',
         );
     }
 }

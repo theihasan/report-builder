@@ -2,7 +2,6 @@
 
 namespace Ihasan\ReportBuilder\Tests\Feature;
 
-use Illuminate\Http\Request;
 use Ihasan\ReportBuilder\DataSources\EloquentDataSource;
 use Ihasan\ReportBuilder\Enums\AggregateFunction;
 use Ihasan\ReportBuilder\Enums\FilterOperator;
@@ -10,6 +9,7 @@ use Ihasan\ReportBuilder\ReportBuilder;
 use Ihasan\ReportBuilder\Support\Field;
 use Ihasan\ReportBuilder\Tests\Fixtures\TestModel;
 use Ihasan\ReportBuilder\Tests\TestCase;
+use Illuminate\Http\Request;
 
 class DataSourceMetadataApiTest extends TestCase
 {

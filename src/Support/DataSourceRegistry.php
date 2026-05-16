@@ -2,10 +2,10 @@
 
 namespace Ihasan\ReportBuilder\Support;
 
-use Illuminate\Http\Request;
 use Ihasan\ReportBuilder\Contracts\DataSourceContract;
 use Ihasan\ReportBuilder\Exceptions\DataSourceAlreadyRegisteredException;
 use Ihasan\ReportBuilder\Exceptions\DataSourceNotFoundException;
+use Illuminate\Http\Request;
 
 class DataSourceRegistry
 {
