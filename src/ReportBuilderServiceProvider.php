@@ -6,8 +6,11 @@ namespace Ihasan\ReportBuilder;
 
 use Ihasan\ReportBuilder\Commands\ReportBuilderCommand;
 use Ihasan\ReportBuilder\Contracts\ReportSourceContract;
+use Ihasan\ReportBuilder\Query\FilterCompiler;
+use Ihasan\ReportBuilder\Query\ReportQueryCompiler;
 use Ihasan\ReportBuilder\Support\DataSourceRegistry;
 use Ihasan\ReportBuilder\Support\SourceRegistry;
+use Ihasan\ReportBuilder\Validation\DefinitionValidator;
 use Illuminate\Contracts\Foundation\Application;
 use InvalidArgumentException;
 use Spatie\LaravelPackageTools\Package;
@@ -56,5 +59,15 @@ class ReportBuilderServiceProvider extends PackageServiceProvider
                 $app->make(DataSourceRegistry::class),
             ),
         );
+
+        $this->app->singleton(
+            DefinitionValidator::class,
+            static fn (Application $app): DefinitionValidator => new DefinitionValidator(
+                $app->make(SourceRegistry::class),
+            ),
+        );
+
+        $this->app->singleton(FilterCompiler::class);
+        $this->app->singleton(ReportQueryCompiler::class);
     }
 }
