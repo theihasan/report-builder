@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ihasan\ReportBuilder\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SavedReport extends Model
 {
@@ -16,4 +17,9 @@ class SavedReport extends Model
         'definition' => 'array',
         'created_by' => 'integer',
     ];
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(ReportSchedule::class, 'saved_report_id');
+    }
 }
