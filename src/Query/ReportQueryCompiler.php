@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Ihasan\ReportBuilder\Query;
 
 use Ihasan\ReportBuilder\DTOs\ReportDefinition;
+use Ihasan\ReportBuilder\Enums\AggregateFunction;
 use Ihasan\ReportBuilder\Exceptions\InvalidReportDefinitionException;
+use Ihasan\ReportBuilder\ReportSources\Fields\RelationAggregateField;
 use Ihasan\ReportBuilder\ReportSources\Fields\RelationField;
 use Ihasan\ReportBuilder\Support\SourceRegistry;
 use Ihasan\ReportBuilder\Validation\DefinitionValidator;
@@ -29,10 +31,17 @@ class ReportQueryCompiler
 
         $selects = [];
         $relationsToLoad = [];
+        $aggregateFields = [];
 
         foreach ($definition->selectedColumns() as $selectedColumn) {
             $fieldKey = $selectedColumn->fieldKey();
             $field = $source->field($fieldKey);
+
+            if ($field instanceof RelationAggregateField) {
+                $aggregateFields[$fieldKey] = $field;
+
+                continue;
+            }
 
             if ($field instanceof RelationField) {
                 $relationsToLoad[] = $field->relation();
@@ -41,18 +50,15 @@ class ReportQueryCompiler
                 continue;
             }
 
-            if (str_contains($fieldKey, '.')) {
-                throw new InvalidReportDefinitionException([
-                    ['path' => 'selected_columns', 'message' => sprintf('Relation and aggregate fields are not supported yet: [%s].', $fieldKey)],
-                ]);
-            }
-
             $selects[] = $fieldKey;
         }
 
         $selects[] = $model->getKeyName();
-
         $query->select(array_values(array_unique($selects)));
+
+        foreach ($aggregateFields as $aggregateKey => $aggregateField) {
+            $this->applyAggregateField($query, $aggregateField, $aggregateKey);
+        }
 
         if ($relationsToLoad !== []) {
             $query->with(array_values(array_unique($relationsToLoad)));
@@ -64,10 +70,11 @@ class ReportQueryCompiler
 
         foreach ($definition->sortDefinitions() as $sortDefinition) {
             $fieldKey = $sortDefinition->fieldKey();
+            $field = $source->field($fieldKey);
 
-            if (str_contains($fieldKey, '.')) {
+            if ($field instanceof RelationField) {
                 throw new InvalidReportDefinitionException([
-                    ['path' => 'sorts', 'message' => sprintf('Relation and aggregate fields are not supported yet: [%s].', $fieldKey)],
+                    ['path' => 'sorts', 'message' => sprintf('Sorting by relation fields is not supported: [%s].', $fieldKey)],
                 ]);
             }
 
@@ -75,5 +82,18 @@ class ReportQueryCompiler
         }
 
         return $query;
+    }
+
+    private function applyAggregateField(Builder $query, RelationAggregateField $field, string $alias): void
+    {
+        $relation = $field->relation();
+
+        match ($field->aggregateFunction()) {
+            AggregateFunction::Count => $query->withCount([$relation.' as '.$alias]),
+            AggregateFunction::Sum => $query->withSum([$relation.' as '.$alias], (string) $field->attribute()),
+            AggregateFunction::Avg => $query->withAvg([$relation.' as '.$alias], (string) $field->attribute()),
+            AggregateFunction::Min => $query->withMin([$relation.' as '.$alias], (string) $field->attribute()),
+            AggregateFunction::Max => $query->withMax([$relation.' as '.$alias], (string) $field->attribute()),
+        };
     }
 }
