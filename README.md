@@ -5,14 +5,14 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/ihasan/report-builder/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/ihasan/report-builder/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/ihasan/report-builder.svg?style=flat-square)](https://packagist.org/packages/ihasan/report-builder)
 
-`ihasan/report-builder` is a Laravel package for building safe, source-driven reports from Eloquent queries.
+`ihasan/report-builder` is a Laravel package for building **safe, source-driven reports** from Eloquent queries.
 
 It provides:
 
-- explicit report sources with explicit fields
+- explicit report sources and explicit fields
 - validated report definitions (columns, filters, sorts, output format)
 - preview execution with pagination metadata
-- CSV and XLSX export
+- CSV and XLSX export via built-in exporters
 - saved report and schedule persistence primitives
 
 ## Installation
@@ -21,11 +21,11 @@ It provides:
 composer require ihasan/report-builder
 ```
 
-See full setup steps in [docs/installation.md](docs/installation.md).
+For full setup (config + migrations + verification), see [docs/installation.md](docs/installation.md).
 
 ## Quickstart
 
-Define a source, register it, then run a preview.
+Define a source, register it, build a definition, and preview it.
 
 ```php
 <?php
@@ -73,7 +73,7 @@ $definition = new ReportDefinition(
 $preview = app(PreviewRunner::class)->preview($definition, perPage: 25, page: 1);
 ```
 
-For the full first-run flow (including filters, export, and saving definitions), see [docs/quickstart.md](docs/quickstart.md).
+For the full first-run flow (filters, validation, export, saved reports), see [docs/quickstart.md](docs/quickstart.md).
 
 ## Documentation
 
@@ -83,7 +83,10 @@ For the full first-run flow (including filters, export, and saving definitions),
 - [Architecture Notes](docs/ARCHITECTURE.md)
 - [Documentation Index](docs/index.md)
 
-Examples and recipe docs are not published yet. Add future examples under `docs/examples/` and link them here when available.
+## Examples
+
+- Examples directory (planned): `docs/examples/`
+- Once examples are added, link them from the docs index and this section.
 
 ## Testing
 

@@ -1,38 +1,23 @@
 # Core Concepts
 
-This package is centered around a few explicit building blocks. Once you understand them, the rest of the API feels straightforward.
+This package is intentionally source-driven and explicit. These are the concepts you will use most.
 
 ## Report Source
 
-A **Report Source** is the root definition of where report data comes from.
+A **Report Source** defines where report data comes from.
 
 A source must provide:
 
-- a stable key (`key()`), like `users` or `orders`
-- a human label (`label()`)
-- an Eloquent base query (`query()`)
-- an explicit list of available fields (`fields()`)
+- `key()` - stable source key (`users`, `orders`, etc.)
+- `label()` - human label
+- `fields()` - explicit safe field list
+- `query()` - base Eloquent query
 
-You usually create it by extending `Ihasan\ReportBuilder\ReportSources\ReportSource`.
-
-```php
-class OrdersReportSource extends ReportSource
-{
-    public function __construct()
-    {
-        parent::__construct('orders', 'Orders');
-    }
-
-    public function query(): Builder
-    {
-        return Order::query();
-    }
-}
-```
+Most apps extend `Ihasan\ReportBuilder\ReportSources\ReportSource`.
 
 ## Field
 
-A **Field** is a safe, explicit column-like unit that a source exposes.
+A **Field** is an explicitly allowed reporting field for a source.
 
 Built-in field classes include:
 
@@ -41,127 +26,132 @@ Built-in field classes include:
 - `DateField`
 - `BooleanField`
 - `MoneyField`
-- relation-aware fields:
-  - `RelationField`
-  - `RelationAggregateField`
+- `RelationField`
+- `RelationAggregateField`
 
-Each field has a key and capabilities like selectable/sortable/filterable.
+Typical field capabilities:
+
+- `selectable()`
+- `sortable()`
+- `filterable()`
+
+Example:
 
 ```php
-TextField::make('status')->selectable()->sortable()->filterable();
-NumberField::make('amount')->selectable()->sortable()->filterable();
+TextField::make('email')->selectable()->sortable()->filterable();
+DateField::make('created_at')->selectable()->sortable()->filterable();
 ```
 
 ## Report Definition
 
-A **Report Definition** is the serializable blueprint of a report run (`DTOs\ReportDefinition`).
+A **Report Definition** (`DTOs\ReportDefinition`) is a serializable blueprint for a report run.
 
-It includes:
+It holds:
 
 - `sourceKey`
 - selected columns (`SelectedColumn[]`)
 - sorts (`SortDefinition[]`)
 - optional filters (`FilterGroup`)
-- output (`OutputDefinition`, e.g. json/csv/xlsx)
+- output format (`OutputDefinition`, e.g. `json`, `csv`, `xlsx`)
 
-```php
-$definition = new ReportDefinition(
-    sourceKey: 'orders',
-    selectedColumns: [new SelectedColumn('amount')],
-    outputDefinition: new OutputDefinition('csv'),
-);
-```
+Definitions support `toArray()`, `fromArray()`, `toJson()`, and `fromJson()` for persistence.
 
 ## Filter Group / Condition
 
-Filters are tree-based:
+Filtering is tree-based:
 
-- `FilterCondition`: one rule (`field_key`, operator, value)
-- `FilterGroup`: combines conditions/groups with `and` or `or`
+- `FilterCondition` = one rule (`field_key`, `operator`, `value`)
+- `FilterGroup` = logical group (`and`/`or`) of conditions and/or nested groups
+
+Example:
 
 ```php
 new FilterGroup('and', [
-    new FilterCondition('amount', FilterOperator::GreaterThan, 100),
+    new FilterCondition('created_at', FilterOperator::LastNDays, 30),
     new FilterGroup('or', [
-        new FilterCondition('status', FilterOperator::Equals, 'paid'),
-        new FilterCondition('status', FilterOperator::IsNull),
+        new FilterCondition('email', FilterOperator::Like, '%@example.com'),
+        new FilterCondition('email', FilterOperator::Like, '%@example.org'),
     ]),
 ]);
 ```
 
 ## Validator
 
-`Validation\DefinitionValidator` checks that a definition is valid for a registered source.
+`Validation\DefinitionValidator` validates a definition against the registered source.
 
-Examples of what it enforces:
+It checks, for example:
 
 - source key exists
-- selected columns refer to defined fields
-- sort fields are sortable
-- filter fields/operators are valid for the field
-- relation/aggregate constraints are respected
+- selected columns exist and are selectable
+- sort fields exist and are sortable
+- filter fields exist and are filterable
+- filter values match operator expectations
 
-`ReportQueryCompiler` uses this validation before compiling queries.
+Use `assertValid()` to throw `InvalidReportDefinitionException` when invalid.
 
 ## Query Compiler
 
-`Query\ReportQueryCompiler` transforms a validated `ReportDefinition` into an Eloquent query:
+`Query\ReportQueryCompiler` compiles a valid `ReportDefinition` into an Eloquent query.
 
-- applies safe field selection
-- applies filters through `FilterCompiler`
-- applies sorts
-- handles relation and aggregate field compilation
+It applies:
 
-You can call it directly for advanced use cases, or use higher-level runners.
+- selected fields
+- relation eager loads (for `RelationField`)
+- relation aggregates (for `RelationAggregateField`)
+- filters via `FilterCompiler`
+- sort clauses
+
+`ReportRunner` and `PreviewRunner` both build on this.
 
 ## Preview Runner
 
-`Execution\PreviewRunner` executes a paginated preview and returns structured payload data:
+`Execution\PreviewRunner` runs paginated previews and returns structured response data:
 
-- `columns` metadata
-- output-mapped `rows`
+- `columns`
+- `rows`
 - `pagination`
 
-This is the usual API for interactive report previews.
+Use it when building interactive preview endpoints or screens.
 
 ## Exporter
 
-Exports are managed through:
+Exports are handled through:
 
-- `Execution\ExportManager` (format-to-exporter routing)
-- `Execution\ReportRunner::export()` (easy entry point)
+- `Execution\ExportManager` (routes by format)
+- `Execution\ReportRunner::export()` (simple entry point)
 
 Built-in exporters:
 
-- `csv` via `CsvExporter`
-- `xlsx` via `XlsxExporter`
+- `CsvExporter` for `csv`
+- `XlsxExporter` for `xlsx`
 
-The export result payload is:
+Export return shape:
 
 - `filename`
 - `mime_type`
-- `content` (file bytes/string)
+- `content`
 
 ## Saved Report
 
-A **Saved Report** stores report definitions for later reuse.
+A **Saved Report** persists report definitions for reuse.
 
-Persistence is handled by `Persistence\SavedReportRepository`, backed by `Models\SavedReport`.
+- Model: `Models\SavedReport`
+- Repository: `Persistence\SavedReportRepository`
 
-Key behavior:
+Main repository actions:
 
-- `saveDefinition(...)` stores name, `source_key`, definition JSON/array, visibility
-- `loadDefinition(...)` hydrates `ReportDefinition`
-- `updateDefinition(...)` updates stored definition
+- `saveDefinition(...)`
+- `loadDefinition(...)`
+- `updateDefinition(...)`
 
-## Scheduler
+Saved records store `source_key` + serialized definition payload.
 
-Scheduling **is implemented**.
+## Scheduler (implemented)
 
-Relevant pieces:
+Scheduling primitives are implemented in the package:
 
 - `Models\ReportSchedule`
 - `Scheduling\DueScheduleDiscovery`
 - command: `php artisan report-builder:schedules:due`
 
-Current scheduling support discovers due schedules (cron-based) for saved reports. It does **not** automatically send emails or dispatch exports by itself in this package layer.
+Current implementation discovers due schedules; it does not itself deliver emails or enqueue full delivery workflows.

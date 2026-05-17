@@ -1,19 +1,17 @@
 # Quickstart
 
-This quickstart walks through a complete first flow using the package's **real** API:
+This tutorial walks through a complete first flow using the package's existing APIs:
 
-1. Define a report source.
-2. Register it in package config.
-3. Build a `ReportDefinition`.
-4. Preview results.
-5. Export CSV/XLSX.
-6. (Optional) save the definition.
+1. Define a `UsersReportSource`
+2. Register it in config
+3. Build a `ReportDefinition`
+4. Validate + preview it
+5. Export CSV/XLSX
+6. Optionally save the definition
 
-We'll use a simple `Users` report.
+## 1) Define a report source
 
-## 1) Create a report source
-
-Create a source class (for example `app/Reports/Sources/UsersReportSource.php`):
+Create `app/Reports/Sources/UsersReportSource.php`:
 
 ```php
 <?php
@@ -53,7 +51,7 @@ class UsersReportSource extends ReportSource
 
 ## 2) Register the source
 
-In your app `config/report-builder.php`, add your source class:
+In your app's `config/report-builder.php`:
 
 ```php
 'report_sources' => [
@@ -61,11 +59,9 @@ In your app `config/report-builder.php`, add your source class:
 ],
 ```
 
-The package service provider reads this config and registers each source in `SourceRegistry`.
+The service provider reads this config and registers each class in `SourceRegistry`.
 
 ## 3) Build a report definition
-
-Use DTOs to describe selected columns, sorting, and filters.
 
 ```php
 <?php
@@ -95,14 +91,15 @@ $definition = new ReportDefinition(
 );
 ```
 
-## 4) Preview the report
-
-Resolve `PreviewRunner` from the container:
+## 4) Validate and preview
 
 ```php
 <?php
 
 use Ihasan\ReportBuilder\Execution\PreviewRunner;
+use Ihasan\ReportBuilder\Validation\DefinitionValidator;
+
+app(DefinitionValidator::class)->assertValid($definition);
 
 $preview = app(PreviewRunner::class)->preview(
     definition: $definition,
@@ -113,24 +110,25 @@ $preview = app(PreviewRunner::class)->preview(
 
 `$preview` contains:
 
-- `columns` metadata (`field_key`, `output_key`, `label`, `type`)
-- `rows` mapped for output labels
+- `columns` (`field_key`, `output_key`, `label`, `type`)
+- `rows` (mapped row output)
 - `pagination` (`page`, `per_page`, `total`, `total_pages`)
 
-## 5) Export the report
+## 5) Export the same report
 
-Use `ReportRunner`.
+Use `ReportRunner::export()` with different output definitions.
 
-### CSV export
+### CSV
 
 ```php
 <?php
 
 use Ihasan\ReportBuilder\DTOs\OutputDefinition;
+use Ihasan\ReportBuilder\DTOs\ReportDefinition;
 use Ihasan\ReportBuilder\Execution\ReportRunner;
 
 $csvDefinition = new ReportDefinition(
-    sourceKey: 'users',
+    sourceKey: $definition->sourceKey(),
     selectedColumns: $definition->selectedColumns(),
     sortDefinitions: $definition->sortDefinitions(),
     filters: $definition->filters(),
@@ -138,16 +136,15 @@ $csvDefinition = new ReportDefinition(
 );
 
 $csv = app(ReportRunner::class)->export($csvDefinition);
-// ['filename' => 'users-report.csv', 'mime_type' => 'text/csv; charset=UTF-8', 'content' => '...']
 ```
 
-### XLSX export
+### XLSX
 
 ```php
 <?php
 
 $xlsxDefinition = new ReportDefinition(
-    sourceKey: 'users',
+    sourceKey: $definition->sourceKey(),
     selectedColumns: $definition->selectedColumns(),
     sortDefinitions: $definition->sortDefinitions(),
     filters: $definition->filters(),
@@ -155,30 +152,29 @@ $xlsxDefinition = new ReportDefinition(
 );
 
 $xlsx = app(ReportRunner::class)->export($xlsxDefinition);
-// ['filename' => 'users-report.xlsx', 'mime_type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'content' => '...']
 ```
 
-## 6) Optional: save a definition for reuse
+Both exports return:
 
-Use `SavedReportRepository` to persist a report definition.
+- `filename`
+- `mime_type`
+- `content`
+
+## 6) Optional: save for reuse
 
 ```php
 <?php
 
 use Ihasan\ReportBuilder\Persistence\SavedReportRepository;
 
-$saved = app(SavedReportRepository::class)->saveDefinition(
-    name: 'Example.com Users',
+$savedReport = app(SavedReportRepository::class)->saveDefinition(
+    name: 'Example Users',
     definition: $definition,
     createdBy: auth()->id(),
     visibility: 'private',
 );
+
+$loadedDefinition = app(SavedReportRepository::class)->loadDefinition($savedReport);
 ```
 
-Later, load it back:
-
-```php
-$loadedDefinition = app(SavedReportRepository::class)->loadDefinition($saved);
-```
-
-You now have a full create -> preview -> export -> save flow.
+You now have a full source -> definition -> preview -> export -> save flow.
